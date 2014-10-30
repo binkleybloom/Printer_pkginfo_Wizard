@@ -1,0 +1,18 @@
+
+servername="smb://as-prq-03.ad.syr.edu/"        ## Print server URL - needs trailing slash like "smb://as-prq-03.ad.syr.edu/"
+printername="AS-PSY-HP-M551-430HH"           ## Queue name
+location="430 Huntington Hall"
+gui_display_name="HP Color Laser M551 - Psy Main Ofc"     ## Name as it appears to the user
+driver_ppd="/Library/Printers/PPDs/Contents/Resources/HP LaserJet 500 color M551.gz"  ## path to correct PPD
+
+# Populate these options if you want to set specific options for the printer. E.g. duplexing installed, etc.
+# Increment the version number if intent is to update an existing printer.
+
+OPTIONS="\
+-o HPOption_Duplexer=True \
+-o HPOption_Tray3=False"
+
+## Uncomment next two lines if printing via Windows print server ##
+
+#servername="smb://as-prq-03.ad.syr.edu/"         ## Print server URL - needs trailing slash like "smb://as-prq-03.ad.syr.edu/"
+#OPTIONS+=" -o printer-is-shared=false -o printer-error-policy=abort-job -o printer-op-policy=authenticated "
