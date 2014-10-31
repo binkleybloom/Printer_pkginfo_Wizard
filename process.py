@@ -8,9 +8,29 @@ import os, sys, subprocess, shlex, string
 
 printers = []
 selectedPrinter = ""
+DeviceURI = ""
+SelectedPPD = ""
 
-global OptionList
-
+def fnPrintCurrentState():
+    os.system('clear')
+    print "=============================\n"
+    print "\n    Selected Printer:", Printer
+    
+    if (DeviceURI):
+        print "         Printer URI:", DeviceURI
+        print "Printer Make & Model:", PrinterMakeModel
+        print "    Printer Location:", PrinterLocation
+    
+    if (SelectedPPD):
+        print "        PPD Selected:", SelectedPPD
+        
+#     if (SelectedOptions):
+#         print "    Selected Options:"
+#         for curOption as SelectedOptions:
+#             print "         ", curOption
+            
+    
+    print "\n=============================\n"
 
 def fnGetConfiguredPrinter():
     listPrintersCMD = ['/usr/bin/lpstat', '-p']    
@@ -89,13 +109,7 @@ def fnGetDeviceOptions(SelPrinter):
     
 
 def fnChoosePPD():
-    os.system('clear')
-    print "\nPrinter is set to: ", Printer
-    print "=============================\n"
-    print "         Printer URI:", DeviceURI
-    print "Printer Make & Model:", PrinterMakeModel
-    print "    Printer Location:", PrinterLocation
-    print "\n=============================\n"
+    fnPrintCurrentState()
     print "What PPD would you like to use with this printer?"
     print "Enter a search term for the PPD. Usually, a model number works well when "
     print "attempting to select a PPD, so if you have an HP M401dne, try 'M401', or  "
@@ -118,13 +132,7 @@ def fnChoosePPD():
         if str(ppdSearchTerm) in ppd:
             foundPPDs.append(ppd)
             
-    os.system('clear')
-    print "\nPrinter is set to: ", Printer
-    print "=============================\n"
-    print "         Printer URI:", DeviceURI
-    print "Printer Make & Model:", PrinterMakeModel
-    print "    Printer Location:", PrinterLocation
-    print "\n=============================\n"
+    fnPrintCurrentState()
     
     if (len(foundPPDs) < 1):
         print "I'm sorry - I couldn't find anything."
@@ -153,8 +161,17 @@ def fnChoosePPD():
             fnChoosePPD()
  
 def fnSetPackageDependancy():
+    printerStyles = ["Hewlett Packard", "Canon - Commercial Copiers", 'Canon - Consumer Printers', 'Lexmark', 'Epson']
+    driverSets = ['HewlettPackardPrinterDrivers','Canon_UFR_II_Installer','CanonPrinterDrivers','LexmarkPrinterDrivers','EPSONPrinterDrivers']
     
-    print ""
+    print "These are the driver sets available in the Munki repository."
+    print "Please select which set is required by this printer, or if"
+    print "you will install the drivers by hand."
+    
+    for dI, dV in enumerate(printerStyles):
+        print '[',pI,'] -', pV
+    
+    print "[9999] - No Dependancy, will install by hand."
 
 
 
@@ -170,25 +187,9 @@ def fnSetPKGINFOVersion():
  
     
 printerSelection = fnGetConfiguredPrinter()
-print "   Printer is set to: ", Printer
-
+fnPrintCurrentState()
 fnGetDeviceOptions(Printer)
-
-os.system('clear')
-print "\n   Printer is set to: ", Printer
-print "=============================\n"
-print "         Printer URI:", DeviceURI
-print "Printer Make & Model:", PrinterMakeModel
-print "    Printer Location:", PrinterLocation
-print "\n=============================\n"
-
+fnPrintCurrentState()
 fnChoosePPD()
-
-os.system('clear')
-print "\n   Printer is set to: ", Printer
-print "=============================\n"
-print "         Printer URI:", DeviceURI
-print "Printer Make & Model:", PrinterMakeModel
-print "    Printer Location:", PrinterLocation
-print "        PPD Selected:", SelectedPPD
-print "\n=============================\n"
+fnPrintCurrentState()
+fnSetPackageDependancy()
