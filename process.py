@@ -4,38 +4,54 @@
 Created by Tim Schutt for Syracuse University, 2014
 taschutt@syr.edu"""
 
-import os, sys, subprocess, shlex, string
+import os, sys, subprocess, shlex, string, re
+from optparse import Option
 
 printers = []
 selectedPrinter = ""
 DeviceURI = ""
 SelectedPPD = ""
+PrinterDriver = ""
+OptionList = []
 
 def fnPrintCurrentState():
     os.system('clear')
     print "=============================\n"
-    print "\n    Selected Printer:", Printer
+    print "Selected Printer     :", Printer
     
     if (DeviceURI):
-        print "         Printer URI:", DeviceURI
-        print "Printer Make & Model:", PrinterMakeModel
-        print "    Printer Location:", PrinterLocation
+        print "Printer URI          :", DeviceURI
+        print "Printer Make & Model :", PrinterMakeModel
+        print "Printer Location     :", PrinterLocation
+        
+    if (DeviceURI[:6] == "smb://"):
+        print "Printer Connection   : Active Directory Queue"
+    else:
+        print "Printer Connection   : Direct"
     
     if (SelectedPPD):
-        print "        PPD Selected:", SelectedPPD
+        print "PPD Selected         :", SelectedPPD
         
-#     if (SelectedOptions):
-#         print "    Selected Options:"
-#         for curOption as SelectedOptions:
-#             print "         ", curOption
+    if (PrinterDriver):
+        print "Selected Drivers     :", PrinterDriver
             
-    
+    if (OptionList):
+        x = False
+        print "\nSelected Options     :",
+        
+        for eachoption in OptionList:
+            if (x):
+                print "                     :", eachoption
+            else:
+                print eachoption
+                x = True
+                
     print "\n=============================\n"
 
 def fnGetConfiguredPrinter():
     listPrintersCMD = ['/usr/bin/lpstat', '-p']    
     listPrinters = subprocess.Popen(listPrintersCMD, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    (printersList, error_output) = listPrinters.communicate()
+    (printersList, errorBucket) = listPrinters.communicate()
     
     for printerLine in printersList.split('\n'):
         if printerLine.count(' ') > 1:
@@ -85,7 +101,7 @@ def fnGetDeviceOptions(SelPrinter):
     print SelPrinter
     cmdGetURI = ['/usr/bin/lpoptions', '-p', SelPrinter]
     processGetURI = subprocess.Popen(cmdGetURI, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    (options, eropts) = processGetURI.communicate()
+    (options, errorbucket) = processGetURI.communicate()
     optionsRawList = shlex.split(options)
     
     print optionsRawList
@@ -122,7 +138,7 @@ def fnChoosePPD():
     
     cmdPPDSearch = ['/bin/ls', '/Library/Printers/PPDs/Contents/Resources']
     processPPDSearch = subprocess.Popen(cmdPPDSearch, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    (ppdListRaw, ppderr) = processPPDSearch.communicate()
+    (ppdListRaw, errorbucket) = processPPDSearch.communicate()
     
     ppdList = string.split(ppdListRaw, '\n')
     
@@ -169,12 +185,64 @@ def fnSetPackageDependancy():
     print "you will install the drivers by hand."
     
     for dI, dV in enumerate(printerStyles):
-        print '[',pI,'] -', pV
+        print '[',dI,'] -', dV
     
-    print "[9999] - No Dependancy, will install by hand."
+    print "[9999] - No Dependency, will install by hand."
+    
+    driverSelect = int(raw_input('Selection: '))
+    
+    if (driverSelect == 9999):
+        global PrinterDriver
+        PrinterDriver = ''
+    elif ((driverSelect >= 0) & (driverSelect < len(driverSets))):
+        global PrinterDriver
+        PrinterDriver = driverSets[driverSelect]
+    else:
+        print "I'm sorry, I didn't understand that input. Please try again"
+        fnSetPackageDependancy()
+    
+def fnSetPrinterOptions():
+    cmdGetOpts = ['lpoptions', '-p', Printer, '-l']
+    processGetOpts = subprocess.Popen(cmdGetOpts, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    (resultGetOpts, errorbucket) = processGetOpts.communicate()
+    
+    resultLinesGetOpts = string.split(resultGetOpts, '\n')
+    
+    global OptionList
+    OptionList = []
+    printerOptionsDict = {}
+    printerOptions = []
 
+    for option in resultLinesGetOpts:
+        if len(option) > 3:
+            optionSet = string.split(option, ':')
+            tempKey = optionSet[0]
+            tOK = string.split(tempKey, "/")
+            oK = tOK[0]
+            query = re.compile('\*\w+')
+            optResult = query.findall(optionSet[1])
+            oV = optResult[0]
+            printerOptionsDict[oK] = oV    
 
-
+    for key, stuff in printerOptionsDict.iteritems():
+        printerOptions.append(key + "=" + stuff[1:])
+        
+    for number, option in enumerate(printerOptions):
+        print "[", number, "] ", option
+        
+    optionSelect = str(raw_input('Please enter the options you would like to include, separated by commas. : '))
+    
+    for selection in string.split(optionSelect, ','):
+        OptionList.append(printerOptions[int(selection)])
+        
+    if (DeviceURI[0:6] == "smb://"):
+        OptionList.append('printer-is-shared=False')
+        OptionList.append('printer-error-policy=abort-job')
+        OptionList.append('printer-op-policy=authenticated')
+        
+   # print OptionList
+    
+    
 def fnSetPKGINFOName():
     
     print ""
@@ -193,3 +261,6 @@ fnPrintCurrentState()
 fnChoosePPD()
 fnPrintCurrentState()
 fnSetPackageDependancy()
+fnPrintCurrentState()
+fnSetPrinterOptions()
+fnPrintCurrentState()
