@@ -25,12 +25,14 @@ def fnPrintCurrentState():
         print "Printer Location     :", PrinterLocation
         
     if (DeviceURI[:6] == "smb://"):
-        print "Printer Connection   : Active Directory Queue"
+        print "\nPrinter Connection   : Active Directory Queue"
+        print "Print Server         :", PrintServer
+        print "Printer Queue        :", PrinterQueue
     else:
-        print "Printer Connection   : Direct"
+        print "\nPrinter Connection   : Direct"
     
     if (SelectedPPD):
-        print "PPD Selected         :", SelectedPPD
+        print "\nPPD Selected         :", SelectedPPD
         
     if (PrinterDriver):
         print "Selected Drivers     :", PrinterDriver
@@ -49,6 +51,9 @@ def fnPrintCurrentState():
     print "\n=============================\n"
 
 def fnGetConfiguredPrinter():
+    if (len(printers) > 0):
+        del printers [:]
+        
     listPrintersCMD = ['/usr/bin/lpstat', '-p']    
     listPrinters = subprocess.Popen(listPrintersCMD, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     (printersList, errorBucket) = listPrinters.communicate()
@@ -98,7 +103,6 @@ def fnPrnSelVerify(selectedPrinter):
 
 
 def fnGetDeviceOptions(SelPrinter):
-    print SelPrinter
     cmdGetURI = ['/usr/bin/lpoptions', '-p', SelPrinter]
     processGetURI = subprocess.Popen(cmdGetURI, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     (options, errorbucket) = processGetURI.communicate()
@@ -123,6 +127,13 @@ def fnGetDeviceOptions(SelPrinter):
     global PrinterLocation
     PrinterLocation = OptionsList['printer-location']
     
+    if (DeviceURI[:6] == "smb://"):
+        global PrintServer
+        global PrinterQueue
+        matched = re.match(r"(smb:\/\/[\w\-\.]+)\/(.+)", DeviceURI)
+        PrintServer = matched.group(1)
+        PrinterQueue = matched.group(2)
+
 
 def fnChoosePPD():
     fnPrintCurrentState()
@@ -240,8 +251,20 @@ def fnSetPrinterOptions():
         OptionList.append('printer-error-policy=abort-job')
         OptionList.append('printer-op-policy=authenticated')
         
-   # print OptionList
+def fnVerifySelections(retry):
     
+    if (retry):
+        print "\tI'm sorry, I didn't understand that response.\n\tPlease enter 'y' or 'n'."
+    
+    verified = str(raw_input('\tAre these settings correct? [y/n]: '))
+    
+    if verified == 'y':
+        fnSetPKGINFOName()
+    elif verified == 'n':
+        printerSelection = fnGetConfiguredPrinter()
+    else:
+        fnPrintCurrentState()
+        fnVerifySelections(True)
     
 def fnSetPKGINFOName():
     
@@ -253,6 +276,7 @@ def fnSetPKGINFOVersion():
     
     print ""
  
+#### Call the functions in order ####
     
 printerSelection = fnGetConfiguredPrinter()
 fnPrintCurrentState()
@@ -264,3 +288,4 @@ fnSetPackageDependancy()
 fnPrintCurrentState()
 fnSetPrinterOptions()
 fnPrintCurrentState()
+fnVerifySelections(False)
