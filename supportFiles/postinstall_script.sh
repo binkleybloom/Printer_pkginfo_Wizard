@@ -10,8 +10,8 @@
 
 # Definitions Area #
 
-currentVersion="1.1"
-printername="AS_PRQ_03_AS_CSG_LEX_X734DE_CSG1029"
+currentVersion="<version>"
+printername="<printername>"
 
 ### Determine if receipt is installed ###
 if [ -e /private/etc/cups/deployment/receipts/$printername.plist ]; then
@@ -37,7 +37,7 @@ if [ $? -eq 0 ]; then
 fi
 
 # Now we can install the printer.
-/usr/bin/lpadmin -E -p AS_PRQ_03_AS_CSG_LEX_X734DE_CSG1029 -L Center for Science & Technology 1-029 -D AS-PRQ-03-AS-CSG-LEX-X734DE-CSG1029 -P /Library/Printers/PPDs/Contents/Resources/Lexmark X734de.gz -v smb://AS-PRQ-03.ad.syr.edu/AS-CSG-LEX-X734DE-CSG1029 -o OptDuplex=InstalledM -o printer-op-policy=authenticated -o printer-is-shared=False -o printer-error-policy=abort-job
+<installcommand>
         
 # Enable and start the printers on the system (after adding the printer initially it is paused).
 # /usr/sbin/cupsenable $(lpstat -p | grep -w "printer" | awk '{print$2}')

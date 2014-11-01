@@ -13,6 +13,8 @@ DeviceURI = ""
 SelectedPPD = ""
 PrinterDriver = ""
 OptionList = []
+PkgInfoName = ""
+
 
 def fnPrintCurrentState():
     os.system('clear')
@@ -21,6 +23,7 @@ def fnPrintCurrentState():
     
     if (DeviceURI):
         print "Printer URI          :", DeviceURI
+        print "Printer Display Name :", PrinterDisplayName
         print "Printer Make & Model :", PrinterMakeModel
         print "Printer Location     :", PrinterLocation
         
@@ -47,7 +50,9 @@ def fnPrintCurrentState():
             else:
                 print eachoption
                 x = True
-                
+    if (PkgInfoName):
+        print "\nDeployment Name      :", PkgInfoName
+        print "Deployment Version   :", PkgInfoVersion            
     print "\n=============================\n"
 
 def fnGetConfiguredPrinter():
@@ -122,6 +127,8 @@ def fnGetDeviceOptions(SelPrinter):
     
     global DeviceURI 
     DeviceURI = OptionsList['device-uri']
+    global PrinterDisplayName
+    PrinterDisplayName = OptionsList['printer-info']
     global PrinterMakeModel 
     PrinterMakeModel = OptionsList['printer-make-and-model']
     global PrinterLocation
@@ -247,9 +254,10 @@ def fnSetPrinterOptions():
         OptionList.append(printerOptions[int(selection)])
         
     if (DeviceURI[0:6] == "smb://"):
-        OptionList.append('printer-is-shared=False')
-        OptionList.append('printer-error-policy=abort-job')
         OptionList.append('printer-op-policy=authenticated')
+    
+    OptionList.append('printer-is-shared=False')
+    OptionList.append('printer-error-policy=abort-job')
         
 def fnVerifySelections(retry):
     
@@ -259,22 +267,66 @@ def fnVerifySelections(retry):
     verified = str(raw_input('\tAre these settings correct? [y/n]: '))
     
     if verified == 'y':
-        fnSetPKGINFOName()
+        fnPrintCurrentState()
+        global PkgInfoName
+        global PkgInfoVersion
+        PkgInfoName = str(raw_input('\tPlease enter the deployment name.\n\tExample: printer-psy-hp-m551-430HH-PRQ03\n\t>>> '))
+        PkgInfoVersion = str(raw_input('\n\tPlease enter the deployment version: '))
     elif verified == 'n':
         printerSelection = fnGetConfiguredPrinter()
     else:
         fnPrintCurrentState()
         fnVerifySelections(True)
-    
-def fnSetPKGINFOName():
-    
-    print ""
 
-
-
-def fnSetPKGINFOVersion():
+def fnBuildInstallCommand():
+    global InstallCommand
+    InstallCommandParts = ['/usr/bin/lpadmin', '-E', '-p', Printer, '-L', PrinterLocation, '-D', PrinterDisplayName, '-P', '/Library/Printers/PPDs/Contents/Resources/' + SelectedPPD, '-v', DeviceURI]
     
-    print ""
+    for opt in OptionList:
+        InstallCommandParts.append('-o')
+        InstallCommandParts.append(opt)
+    
+    InstallCommand = ' '.join(InstallCommandParts)
+       
+#    print InstallCommand
+    
+def fnModifyScripts():
+    with open("installcheck_script.sh", "wt") as fout:
+        with open("supportFiles/installcheck_script.sh", "rt") as fin:
+            for line in fin:
+                line = line.replace("<version>", PkgInfoVersion)
+                line = line.replace("<printername>", Printer)
+                fout.write(line)
+    
+    with open("postinstall_script.sh", "wt") as fout:
+        with open("supportFiles/postinstall_script.sh", "rt") as fin:
+            for line in fin:
+                line = line.replace("<version>", PkgInfoVersion)
+                line = line.replace("<printername>", Printer)
+                line = line.replace("<installcommand>", InstallCommand)
+                fout.write(line)
+                
+    with open("uninstall_script.sh", "wt") as fout:
+        with open("supportFiles/uninstall_script.sh", "rt") as fin:
+            for line in fin:
+                line = line.replace("<printername>", Printer)
+                fout.write(line)
+                
+    fnMakePkgInfo()
+                
+def fnMakePkgInfo():
+    pkgVers = '--pkgvers=' + PkgInfoVersion
+    pkgInfoFileName = PkgInfoName + '.plist'
+    makePkgInfoCMD = ['/usr/local/munki/makepkginfo', '--unattended_install', '--nopkg', 'installcheck_script=installcheck_script.sh', '--postinstall_script=postinstall_script.sh', '--uninstall_script=uninstall_script.sh', '--minimum_os_version=10.6.8', pkgVers, '-r', PrinterDriver]
+    pkginfoOutput = subprocess.Popen(makePkgInfoCMD, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    (pkginfoResult, errorBucket) = pkginfoOutput.communicate()
+    
+    with open(pkgInfoFileName, "wt") as pkgout:
+        for line in pkginfoResult:
+            pkgout.write(line)
+    
+    print "PkgInfo printer deployment file has been created as " + PkgInfoName + ".plist"
+    print "Please email this file to munki@syr.edu."
  
 #### Call the functions in order ####
     
@@ -289,3 +341,6 @@ fnPrintCurrentState()
 fnSetPrinterOptions()
 fnPrintCurrentState()
 fnVerifySelections(False)
+fnPrintCurrentState()
+fnBuildInstallCommand()
+fnModifyScripts()
