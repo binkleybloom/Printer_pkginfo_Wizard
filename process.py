@@ -280,7 +280,9 @@ def fnVerifySelections(retry):
 
 def fnBuildInstallCommand():
     global InstallCommand
-    InstallCommandParts = ['/usr/bin/lpadmin', '-E', '-p', Printer, '-L', PrinterLocation, '-D', PrinterDisplayName, '-P', '/Library/Printers/PPDs/Contents/Resources/' + SelectedPPD, '-v', DeviceURI]
+    printerDisplayNameQuoted = '"%s"' % (PrinterDisplayName)
+    printerLocationQuoted = '"%s"' % (PrinterLocation)
+    InstallCommandParts = ['/usr/bin/lpadmin', '-E', '-p', Printer, '-L', printerLocationQuoted, '-D', printerDisplayNameQuoted, '-P', '/Library/Printers/PPDs/Contents/Resources/' + SelectedPPD, '-v', DeviceURI]
     
     for opt in OptionList:
         InstallCommandParts.append('-o')
@@ -313,6 +315,9 @@ def fnModifyScripts():
                 fout.write(line)
                 
     fnMakePkgInfo()
+    
+    cmdCleanup = ['rm', 'installcheck_script.sh', 'postinstall_script.sh', 'uninstall_script.sh']
+    subprocess.call(cmdCleanup)
                 
 def fnMakePkgInfo():
     pkgVers = '--pkgvers=' + PkgInfoVersion
