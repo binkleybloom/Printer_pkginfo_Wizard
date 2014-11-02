@@ -209,11 +209,11 @@ def fnSetPackageDependancy():
     
     driverSelect = int(raw_input('Selection: '))
     
+    global PrinterDriver
+    
     if (driverSelect == 9999):
-        global PrinterDriver
         PrinterDriver = ''
     elif ((driverSelect >= 0) & (driverSelect < len(driverSets))):
-        global PrinterDriver
         PrinterDriver = driverSets[driverSelect]
     else:
         print "I'm sorry, I didn't understand that input. Please try again"
