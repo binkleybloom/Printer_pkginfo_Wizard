@@ -2,11 +2,8 @@
 
 # Windows/AD Hosted printer queue configuration package
 # Based on 2010 Walter Meyer SUNY Purchase College (c)
-# Modified by Nick McSpadden, 2013 and Tim Schutt, 2014
-
-# Script to install and setup printers on a Mac OS X system in a "Munki-Friendly" way.
-# Make sure to install the required drivers first!
-
+# Modified by Nick McSpadden, 2013
+# Fitted for Printer Deploy Wizard by Tim Schutt, Syracuse University, 2014
 
 # Definitions Area #
 
