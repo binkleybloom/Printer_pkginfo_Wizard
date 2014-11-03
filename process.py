@@ -377,14 +377,18 @@ def fnMakePkgInfo():
     generated in fnModifyScripts. Collects output into variable."""
     
     pkgVers = '--pkgvers=' + PkgInfoVersion
+    printerDescription = PrinterMakeModel + PrinterLocation
     pkgInfoFileName = PkgInfoName + '.plist'
     makePkgInfoCMD = ['/usr/local/munki/makepkginfo', '--unattended_install',\
+                      '--name=', PkgInfoName, '--description=', printerDescription,\
                        '--nopkg', '--installcheck_script=installcheck_script.sh',\
                         '--postinstall_script=postinstall_script.sh',\
                          '--uninstall_script=uninstall_script.sh', \
                          '--minimum_os_version=10.6.8', pkgVers, \
                          '-r', PrinterDriver]
-    pkginfoOutput = subprocess.Popen(makePkgInfoCMD, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    pkginfoOutput = subprocess.Popen(makePkgInfoCMD, \
+                                     stdout=subprocess.PIPE, \
+                                     stderr=subprocess.PIPE)
     (pkginfoResult, errorBucket) = pkginfoOutput.communicate()
     
     with open(pkgInfoFileName, "wt") as pkgout: #writes variable output to file.
