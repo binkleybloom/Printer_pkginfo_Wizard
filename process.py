@@ -334,7 +334,7 @@ def fnBuildInstallCommand():
     printerDisplayNameQuoted = '"%s"' % (PrinterDisplayName)
     printerLocationQuoted = '"%s"' % (PrinterLocation)
     
-    InstallCommandParts = ['/usr/bin/lpadmin', '-E', '-p', Printer, \
+    InstallCommandParts = ['/usr/sbin/lpadmin', '-E', '-p', Printer, \
                            '-L', printerLocationQuoted, '-D', \
                            printerDisplayNameQuoted, '-P', \
                            '/Library/Printers/PPDs/Contents/Resources/' + SelectedPPD, \
