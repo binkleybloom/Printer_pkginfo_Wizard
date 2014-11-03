@@ -342,7 +342,7 @@ def fnBuildInstallCommand():
     InstallCommandParts = ['/usr/sbin/lpadmin', '-E', '-p', Printer, \
                            '-L', printerLocationQuoted, '-D', \
                            printerDisplayNameQuoted, '-P', \
-                           '/Library/Printers/PPDs/Contents/Resources/' + SelectedPPD, \
+                           '"/Library/Printers/PPDs/Contents/Resources/' + SelectedPPD + '"', \
                            '-v', DeviceURI]
     
     for opt in OptionList:  #iterates through option list selections
@@ -392,6 +392,7 @@ def fnMakePkgInfo():
     printerDescription = '--description=' + PkgInfoDescription
     pkgInfoFileName = PkgInfoName + '-' + PkgInfoVersion + '.plist'
     makePkgInfoCMD = ['/usr/local/munki/makepkginfo', '--unattended_install', \
+                      '--uninstall_method=uninstall_script', \
                       '--name=' + PkgInfoName, printerDisplayName, printerDescription, \
                       '--nopkg', '--installcheck_script=installcheck_script.sh', \
                       '--postinstall_script=postinstall_script.sh', \
