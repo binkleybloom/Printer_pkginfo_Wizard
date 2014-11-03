@@ -89,7 +89,8 @@ def fnGetConfiguredPrinter():
     for printerLine in printersList.split('\n'):
         if printerLine.count(' ') > 1:
             printerElements = printerLine.split()
-            printers.append(printerElements.pop(1))
+            if printerElements[0] == 'printer':
+                printers.append(printerElements.pop(1))
     
     fnChooseConfiguredPrinter(printers)
 
@@ -307,12 +308,14 @@ def fnVerifySelections(retry):
     
     verified = str(raw_input('\tAre these settings correct? [y/n]: '))
     
-    if verified == 'y':
+    if verified == 'y':  #start prompting for printer name, version and description
         fnPrintCurrentState()
         global PkgInfoName
+        global PkgInfoDescription
         global PkgInfoVersion
         PkgInfoName = str(raw_input('\tPlease enter the deployment name.\
         \n\tExample: printer-as-psy-hp-m551-430hh-prq03\n\t>>> '))
+        PkgInfoDescription = str(raw_input('\n\tPlease enter a printer description.\n\t>>> '))
         PkgInfoVersion = str(raw_input('\n\tPlease enter the deployment version: '))
     elif verified == 'n':
         printerSelection = fnGetConfiguredPrinter()
@@ -377,15 +380,16 @@ def fnMakePkgInfo():
     generated in fnModifyScripts. Collects output into variable."""
     
     pkgVers = '--pkgvers=' + PkgInfoVersion
-    printerDescription = '--description=' + PrinterMakeModel + ', ' + PrinterLocation
-    pkgInfoFileName = PkgInfoName + '.plist'
-    makePkgInfoCMD = ['/usr/local/munki/makepkginfo', '--unattended_install',\
-                      '--name=' + PkgInfoName, printerDescription,\
-                       '--nopkg', '--installcheck_script=installcheck_script.sh',\
-                        '--postinstall_script=postinstall_script.sh',\
-                         '--uninstall_script=uninstall_script.sh', \
-                         '--minimum_os_version=10.6.8', pkgVers, \
-                          "--category=Printers", '-r', PrinterDriver]
+    printerDisplayName = '--displayname=' + PrinterMakeModel + ', ' + PrinterLocation
+    printerDescription = '--description=' + PkgInfoDescription
+    pkgInfoFileName = PkgInfoName + '-' + PkgInfoVersion + '.plist'
+    makePkgInfoCMD = ['/usr/local/munki/makepkginfo', '--unattended_install', \
+                      '--name=' + PkgInfoName, printerDisplayName, printerDescription, \
+                      '--nopkg', '--installcheck_script=installcheck_script.sh', \
+                      '--postinstall_script=postinstall_script.sh', \
+                      '--uninstall_script=uninstall_script.sh', \
+                      '--minimum_os_version=10.6.8', pkgVers, \
+                      "--category=Printers", '-r', PrinterDriver]
     pkginfoOutput = subprocess.Popen(makePkgInfoCMD, \
                                      stdout=subprocess.PIPE, \
                                      stderr=subprocess.PIPE)
