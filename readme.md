@@ -1,7 +1,7 @@
 Munki printer deployment wizard
 =
 
-Python code by Tim Schutt, Syracuse University, &copy; 2014
+Python code by Tim Schutt, Syracuse University, &copy; 2014 with bug squashing assist from Vaughn Miller, @Vaughn_E_Miller
 
 Shell scripts largely based on code available at the Munki wiki, under "Related Tasks: Managing Printers with Munki" by Walter Myer, SUNY Purchase &copy; 2010 
 and Nick McSpadden, 2013
