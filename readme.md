@@ -13,9 +13,10 @@ download via:
 	$ git clone https://github.com/binkleybloom/Printer_pkginfo_Wizard
 
 There are two required components:
+<ul>
 <li>the process.py script
 <li>the supportFiles directory and its unmodified contents - must be in the same directory as process.py
-
+</ul>
 You may rename the process.py file to process.command if you wish to be able to  double click it to launch instead of calling it from a terminal session.
 
 To use this tool:
