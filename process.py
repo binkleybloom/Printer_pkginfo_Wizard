@@ -13,6 +13,9 @@ Nick McSpadden, 2013
 import os, sys, subprocess, shlex, string, re
 from optparse import Option
 
+dirname,filename = os.path.split(os.path.abspath(__file__))
+os.chdir(dirname)
+
 ## Modify the following to match your environment. 
 ## These are used to set driver dependencies. 
 ## The dictionary is configured as 'Human readable':'munki pkgname'
