@@ -377,10 +377,10 @@ def fnMakePkgInfo():
     generated in fnModifyScripts. Collects output into variable."""
     
     pkgVers = '--pkgvers=' + PkgInfoVersion
-    printerDescription = PrinterMakeModel + PrinterLocation
+    printerDescription = '--description=' + PrinterMakeModel + ', ' + PrinterLocation
     pkgInfoFileName = PkgInfoName + '.plist'
     makePkgInfoCMD = ['/usr/local/munki/makepkginfo', '--unattended_install',\
-                      '--name=', PkgInfoName, '--description=', printerDescription,\
+                      '--name=' + PkgInfoName, printerDescription,\
                        '--nopkg', '--installcheck_script=installcheck_script.sh',\
                         '--postinstall_script=postinstall_script.sh',\
                          '--uninstall_script=uninstall_script.sh', \
