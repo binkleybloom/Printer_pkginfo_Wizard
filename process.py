@@ -334,11 +334,13 @@ def fnBuildInstallCommand():
     printerDisplayNameQuoted = '"%s"' % (PrinterDisplayName)
     printerLocationQuoted = '"%s"' % (PrinterLocation)
     
+    printerPPD = '/Library/Printers/PPDs/Contents/Resources/' + SelectedPPD
+    printerPPDQuoted = '"%s"' % (printerPPD)
+    
     InstallCommandParts = ['/usr/sbin/lpadmin', '-E', '-p', Printer, \
                            '-L', printerLocationQuoted, '-D', \
                            printerDisplayNameQuoted, '-P', \
-                           '/Library/Printers/PPDs/Contents/Resources/' + SelectedPPD, \
-                           '-v', DeviceURI]
+                           printerPPDQuoted, '-v', DeviceURI]
     
     for opt in OptionList:  #iterates through option list selections
         InstallCommandParts.append('-o')
