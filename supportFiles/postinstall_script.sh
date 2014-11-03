@@ -37,7 +37,7 @@ fi
 <installcommand>
         
 # Enable and start the printers on the system (after adding the printer initially it is paused).
-# /usr/sbin/cupsenable $(lpstat -p | grep -w "printer" | awk '{print$2}')
+/usr/sbin/cupsenable $(lpstat -p | grep -w "printer" | awk '{print$2}')
 
 # Create a receipt for the printer
 mkdir -p /private/etc/cups/deployment/receipts
