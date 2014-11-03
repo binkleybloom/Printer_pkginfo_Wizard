@@ -161,7 +161,10 @@ def fnGetDeviceInformation(SelPrinter):
     global PrinterMakeModel 
     PrinterMakeModel = OptionsList['printer-make-and-model']
     global PrinterLocation
-    PrinterLocation = OptionsList['printer-location']
+    try: 
+        PrinterLocation = OptionsList['printer-location']
+    except:
+        PrinterLocation = ""
     
     if (DeviceURI[:6] == "smb://"):
         global PrintServer
