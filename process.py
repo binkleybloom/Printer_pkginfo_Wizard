@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-"""CLI Application to streamline the creation of PKGInfo files 
+"""
+CLI Application to streamline the creation of PKGInfo files 
 for printer deployment in Munki. 
 
 Created by Tim Schutt for Syracuse University, 2014 - taschutt@syr.edu
@@ -25,6 +26,10 @@ driverCollection = {'Hewlett Packard':'HewlettPackardPrinterDrivers',\
                     'Canon - Consumer Printers':'CanonPrinterDrivers',\
                     'Lexmark':'LexmarkPrinterDrivers',\
                     'Epson':'EPSONPrinterDrivers'}  
+
+## Enter an example of your house naming convention
+
+nameExample = "printer-as-psy-hp-m551-430hh-prq03"
 
 ## defining variables so fnPrintCurrentState doesn't bark at me
 ## before they are populated.
@@ -317,7 +322,7 @@ def fnVerifySelections(retry):
         global PkgInfoDescription
         global PkgInfoVersion
         PkgInfoName = str(raw_input('\tPlease enter the deployment name.\
-        \n\tExample: printer-as-psy-hp-m551-430hh-prq03\n\t>>> '))
+        \n\tExample: ' + nameExample + '\n\t>>> '))
         PkgInfoDescription = str(raw_input('\n\tPlease enter a printer description.\n\t>>> '))
         PkgInfoVersion = str(raw_input('\n\tPlease enter the deployment version: '))
     elif verified == 'n':
@@ -334,7 +339,7 @@ def fnBuildInstallCommand():
     printerDisplayNameQuoted = '"%s"' % (PrinterDisplayName)
     printerLocationQuoted = '"%s"' % (PrinterLocation)
     
-    InstallCommandParts = ['/usr/bin/lpadmin', '-E', '-p', Printer, \
+    InstallCommandParts = ['/usr/sbin/lpadmin', '-E', '-p', Printer, \
                            '-L', printerLocationQuoted, '-D', \
                            printerDisplayNameQuoted, '-P', \
                            '/Library/Printers/PPDs/Contents/Resources/' + SelectedPPD, \
