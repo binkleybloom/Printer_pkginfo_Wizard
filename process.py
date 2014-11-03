@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-"""CLI Application to streamline the creation of PKGInfo files 
+"""
+CLI Application to streamline the creation of PKGInfo files 
 for printer deployment in Munki. 
 
 Created by Tim Schutt for Syracuse University, 2014 - taschutt@syr.edu
@@ -13,6 +14,9 @@ Nick McSpadden, 2013
 import os, sys, subprocess, shlex, string, re
 from optparse import Option
 
+dirname,filename = os.path.split(os.path.abspath(__file__))
+os.chdir(dirname)
+
 ## Modify the following to match your environment. 
 ## These are used to set driver dependencies. 
 ## The dictionary is configured as 'Human readable':'munki pkgname'
@@ -22,6 +26,10 @@ driverCollection = {'Hewlett Packard':'HewlettPackardPrinterDrivers',\
                     'Canon - Consumer Printers':'CanonPrinterDrivers',\
                     'Lexmark':'LexmarkPrinterDrivers',\
                     'Epson':'EPSONPrinterDrivers'}  
+
+## Enter an example of your house naming convention
+
+nameExample = "printer-as-psy-hp-m551-430hh-prq03"
 
 ## defining variables so fnPrintCurrentState doesn't bark at me
 ## before they are populated.
@@ -153,11 +161,11 @@ def fnGetDeviceInformation(SelPrinter):
     global PrinterMakeModel 
     PrinterMakeModel = OptionsList['printer-make-and-model']
     global PrinterLocation
-    try:
+    try: 
         PrinterLocation = OptionsList['printer-location']
     except:
         PrinterLocation = ""
-        
+    
     if (DeviceURI[:6] == "smb://"):
         global PrintServer
         global PrinterQueue
@@ -317,7 +325,7 @@ def fnVerifySelections(retry):
         global PkgInfoDescription
         global PkgInfoVersion
         PkgInfoName = str(raw_input('\tPlease enter the deployment name.\
-        \n\tExample: printer-as-psy-hp-m551-430hh-prq03\n\t>>> '))
+        \n\tExample: ' + nameExample + '\n\t>>> '))
         PkgInfoDescription = str(raw_input('\n\tPlease enter a printer description.\n\t>>> '))
         PkgInfoVersion = str(raw_input('\n\tPlease enter the deployment version: '))
     elif verified == 'n':
@@ -334,13 +342,11 @@ def fnBuildInstallCommand():
     printerDisplayNameQuoted = '"%s"' % (PrinterDisplayName)
     printerLocationQuoted = '"%s"' % (PrinterLocation)
     
-    printerPPD = '/Library/Printers/PPDs/Contents/Resources/' + SelectedPPD
-    printerPPDQuoted = '"%s"' % (printerPPD)
-    
     InstallCommandParts = ['/usr/sbin/lpadmin', '-E', '-p', Printer, \
                            '-L', printerLocationQuoted, '-D', \
                            printerDisplayNameQuoted, '-P', \
-                           printerPPDQuoted, '-v', DeviceURI]
+                           '"/Library/Printers/PPDs/Contents/Resources/' + SelectedPPD + '"', \
+                           '-v', DeviceURI]
     
     for opt in OptionList:  #iterates through option list selections
         InstallCommandParts.append('-o')
@@ -389,6 +395,7 @@ def fnMakePkgInfo():
     printerDescription = '--description=' + PkgInfoDescription
     pkgInfoFileName = PkgInfoName + '-' + PkgInfoVersion + '.plist'
     makePkgInfoCMD = ['/usr/local/munki/makepkginfo', '--unattended_install', \
+                      '--uninstall_method=uninstall_script', \
                       '--name=' + PkgInfoName, printerDisplayName, printerDescription, \
                       '--nopkg', '--installcheck_script=installcheck_script.sh', \
                       '--postinstall_script=postinstall_script.sh', \
