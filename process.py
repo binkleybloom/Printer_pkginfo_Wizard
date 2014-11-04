@@ -11,7 +11,7 @@ Walter Meyer, SUNY Purchase, 2010
 Nick McSpadden, 2013
 """
 
-import os, sys, subprocess, shlex, string, re
+import os, sys, subprocess, shlex, string, re, plistlib
 from optparse import Option
 
 dirname,filename = os.path.split(os.path.abspath(__file__))
@@ -410,8 +410,16 @@ def fnMakePkgInfo():
     with open(pkgInfoFileName, "wt") as pkgout: #writes variable output to file.
         for line in pkginfoResult:
             pkgout.write(line)
+            
+    ### Now we add the uninstallable key
     
-    print "PkgInfo printer deployment file has been created as " + PkgInfoName + ".plist"
+#    printerpkginfo = PkgInfoName + ".plist"    
+    
+    plistInput = plistlib.readPlist(pkgInfoFileName)
+    plistInput["uninstallable"] = True
+    plistlib.writePlist(plistInput, pkgInfoFileName)
+    
+    print "PkgInfo printer deployment file has been created as " + pkgInfoFileName
  
 ###
 #  Kick the whole damn thing off
