@@ -38,6 +38,7 @@ fi
         
 # Enable and start the printers on the system (after adding the printer initially it is paused).
 /usr/sbin/cupsenable $printername
+/usr/sbin/cupsaccept $printername
 
 # Create a receipt for the printer
 mkdir -p /private/etc/cups/deployment/receipts
