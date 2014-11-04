@@ -5,6 +5,7 @@ CLI Application to streamline the creation of PKGInfo files
 for printer deployment in Munki. 
 
 Created by Tim Schutt for Syracuse University, 2014 - taschutt@syr.edu
+Bug squashing assistance from Vaughn Miller
 
 Much code reused from Printer PKG deploy scripts by:
 Walter Meyer, SUNY Purchase, 2010
