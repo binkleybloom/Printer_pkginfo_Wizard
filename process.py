@@ -5,13 +5,14 @@ CLI Application to streamline the creation of PKGInfo files
 for printer deployment in Munki. 
 
 Created by Tim Schutt for Syracuse University, 2014 - taschutt@syr.edu
+Bug squashing assistance from Vaughn Miller
 
 Much code reused from Printer PKG deploy scripts by:
 Walter Meyer, SUNY Purchase, 2010
 Nick McSpadden, 2013
 """
 
-import os, sys, subprocess, shlex, string, re
+import os, sys, subprocess, shlex, string, re, plistlib
 from optparse import Option
 
 dirname,filename = os.path.split(os.path.abspath(__file__))
@@ -410,8 +411,16 @@ def fnMakePkgInfo():
     with open(pkgInfoFileName, "wt") as pkgout: #writes variable output to file.
         for line in pkginfoResult:
             pkgout.write(line)
+            
+    ### Now we add the uninstallable key
     
-    print "PkgInfo printer deployment file has been created as " + PkgInfoName + ".plist"
+#    printerpkginfo = PkgInfoName + ".plist"    
+    
+    plistInput = plistlib.readPlist(pkgInfoFileName)
+    plistInput["uninstallable"] = True
+    plistlib.writePlist(plistInput, pkgInfoFileName)
+    
+    print "PkgInfo printer deployment file has been created as " + pkgInfoFileName
  
 ###
 #  Kick the whole damn thing off
