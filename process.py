@@ -351,9 +351,18 @@ def fnBuildInstallCommand():
     
     InstallCommandParts = ['/usr/sbin/lpadmin', '-E', '-p', Printer, \
                            '-L', printerLocationQuoted, '-D', \
-                           printerDisplayNameQuoted, '-P', \
-                           '"/Library/Printers/PPDs/Contents/Resources/' + SelectedPPD + '"', \
-                           '-v', DeviceURI]
+                           printerDisplayNameQuoted]
+    
+    # Slightly different options depending on type of PPD
+    if SelectedPPD.endswith('.gz'):      # An installed driver
+        InstallCommandParts.append('-p')                       
+        InstallCommandParts.append('"/Library/Printers/PPDs/Contents/Resources/' + SelectedPPD + '"')
+    if SelectedPPD.endswith('.ppd'):    # Built in generic driver
+        InstallCommandParts.append('-m')
+        InstallCommandParts.append(SelectedPPD)
+
+    InstallCommandParts.append('-v')
+    InstallCommandParts.append(DeviceURI)
     
     for opt in OptionList:  #iterates through option list selections
         InstallCommandParts.append('-o')
