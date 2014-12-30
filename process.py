@@ -408,7 +408,6 @@ def fnMakePkgInfo():
     if PrinterDriver != '':
         makePkgInfoCMD.append('-r')
         makePkgInfoCMD.append(PrinterDriver)        
-        print makePkgInfoCMD
         
     pkginfoOutput = subprocess.Popen(makePkgInfoCMD, \
                                      stdout=subprocess.PIPE, \
