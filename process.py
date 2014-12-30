@@ -395,17 +395,8 @@ def fnMakePkgInfo():
     printerDisplayName = '--displayname=' + PrinterMakeModel + ', ' + PrinterLocation
     printerDescription = '--description=' + PkgInfoDescription
     pkgInfoFileName = PkgInfoName + '-' + PkgInfoVersion + '.plist'
-    if PrinterDriver != '':
-        makePkgInfoCMD = ['/usr/local/munki/makepkginfo', '--unattended_install', \
-                      '--uninstall_method=uninstall_script', \
-                      '--name=' + PkgInfoName, printerDisplayName, printerDescription, \
-                      '--nopkg', '--installcheck_script=installcheck_script.sh', \
-                      '--postinstall_script=postinstall_script.sh', \
-                      '--uninstall_script=uninstall_script.sh', \
-                      '--minimum_os_version=10.6.8', pkgVers, \
-                      "--category=Printers", '-r', PrinterDriver]
-    else:
-        makePkgInfoCMD = ['/usr/local/munki/makepkginfo', '--unattended_install', \
+
+    makePkgInfoCMD = ['/usr/local/munki/makepkginfo', '--unattended_install', \
                       '--uninstall_method=uninstall_script', \
                       '--name=' + PkgInfoName, printerDisplayName, printerDescription, \
                       '--nopkg', '--installcheck_script=installcheck_script.sh', \
@@ -413,6 +404,11 @@ def fnMakePkgInfo():
                       '--uninstall_script=uninstall_script.sh', \
                       '--minimum_os_version=10.6.8', pkgVers, \
                       "--category=Printers"]
+    # Only add the 'requires' key if PrinterDriver has a value
+    if PrinterDriver != '':
+        makePkgInfoCMD.append('-r')
+        makePkgInfoCMD.append(PrinterDriver)        
+        print makePkgInfoCMD
         
     pkginfoOutput = subprocess.Popen(makePkgInfoCMD, \
                                      stdout=subprocess.PIPE, \
