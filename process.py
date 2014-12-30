@@ -189,11 +189,17 @@ def fnChoosePPD():
     if (len(ppdSearchTerm) < 1):
         fnChoosePPD()
     
-    cmdPPDSearch = ['/bin/ls', '/Library/Printers/PPDs/Contents/Resources']
+    cmdPPDSearch = ['/usr/sbin/lpinfo', '-m']
     processPPDSearch = subprocess.Popen(cmdPPDSearch, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     (ppdListRaw, errorbucket) = processPPDSearch.communicate()
     
-    ppdList = string.split(ppdListRaw, '\n')
+    ppdListRaw = ppdListRaw.split('\n')
+    ppdList = []
+    for ppd in ppdListRaw:
+        if ppd.startswith('drv'):
+            ppdList.append(ppd.split(' ', 1)[0])
+        if ppd.startswith('Library'):
+            ppdList.append(ppd.split('gz ', 1)[0] + 'gz')
     
     foundPPDs = []
     
