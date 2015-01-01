@@ -189,11 +189,17 @@ def fnChoosePPD():
     if (len(ppdSearchTerm) < 1):
         fnChoosePPD()
     
-    cmdPPDSearch = ['/bin/ls', '/Library/Printers/PPDs/Contents/Resources']
+    cmdPPDSearch = ['/usr/sbin/lpinfo', '-m']
     processPPDSearch = subprocess.Popen(cmdPPDSearch, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     (ppdListRaw, errorbucket) = processPPDSearch.communicate()
     
-    ppdList = string.split(ppdListRaw, '\n')
+    ppdListRaw = ppdListRaw.split('\n')
+    ppdList = []
+    for ppd in ppdListRaw:
+        if ppd.startswith('drv'):
+            ppdList.append(ppd.split(' ', 1)[0])
+        if ppd.startswith('Library'):
+            ppdList.append(ppd.split('gz ', 1)[0] + 'gz')
     
     foundPPDs = []
     
@@ -345,9 +351,18 @@ def fnBuildInstallCommand():
     
     InstallCommandParts = ['/usr/sbin/lpadmin', '-E', '-p', Printer, \
                            '-L', printerLocationQuoted, '-D', \
-                           printerDisplayNameQuoted, '-P', \
-                           '"/Library/Printers/PPDs/Contents/Resources/' + SelectedPPD + '"', \
-                           '-v', DeviceURI]
+                           printerDisplayNameQuoted]
+    
+    # Slightly different options depending on type of PPD
+    if SelectedPPD.endswith('.gz'):      # An installed driver
+        InstallCommandParts.append('-p')                       
+        InstallCommandParts.append('"/Library/Printers/PPDs/Contents/Resources/' + SelectedPPD + '"')
+    if SelectedPPD.endswith('.ppd'):    # Built in generic driver
+        InstallCommandParts.append('-m')
+        InstallCommandParts.append(SelectedPPD)
+
+    InstallCommandParts.append('-v')
+    InstallCommandParts.append(DeviceURI)
     
     for opt in OptionList:  #iterates through option list selections
         InstallCommandParts.append('-o')
@@ -395,6 +410,7 @@ def fnMakePkgInfo():
     printerDisplayName = '--displayname=' + PrinterMakeModel + ', ' + PrinterLocation
     printerDescription = '--description=' + PkgInfoDescription
     pkgInfoFileName = PkgInfoName + '-' + PkgInfoVersion + '.plist'
+
     makePkgInfoCMD = ['/usr/local/munki/makepkginfo', '--unattended_install', \
                       '--uninstall_method=uninstall_script', \
                       '--name=' + PkgInfoName, printerDisplayName, printerDescription, \
@@ -402,7 +418,12 @@ def fnMakePkgInfo():
                       '--postinstall_script=postinstall_script.sh', \
                       '--uninstall_script=uninstall_script.sh', \
                       '--minimum_os_version=10.6.8', pkgVers, \
-                      "--category=Printers", '-r', PrinterDriver]
+                      "--category=Printers"]
+    # Only add the 'requires' key if PrinterDriver has a value
+    if PrinterDriver != '':
+        makePkgInfoCMD.append('-r')
+        makePkgInfoCMD.append(PrinterDriver)        
+        
     pkginfoOutput = subprocess.Popen(makePkgInfoCMD, \
                                      stdout=subprocess.PIPE, \
                                      stderr=subprocess.PIPE)
