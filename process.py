@@ -199,7 +199,7 @@ def fnChoosePPD():
         if ppd.startswith('drv'):
             ppdList.append(ppd.split(' ', 1)[0])
         if ppd.startswith('Library'):
-            ppdList.append(ppd.split('gz ', 1)[0] + 'gz')
+            ppdList.append('/' + ppd.split('gz ', 1)[0] + 'gz')
     
     foundPPDs = []
     
@@ -348,18 +348,21 @@ def fnBuildInstallCommand():
     global InstallCommand
     printerDisplayNameQuoted = '"%s"' % (PrinterDisplayName)
     printerLocationQuoted = '"%s"' % (PrinterLocation)
+    SelectedPPDQuoted = '"%s"' % (SelectedPPD)
+
     
     InstallCommandParts = ['/usr/sbin/lpadmin', '-E', '-p', Printer, \
                            '-L', printerLocationQuoted, '-D', \
                            printerDisplayNameQuoted]
+
     
     # Slightly different options depending on type of PPD
     if SelectedPPD.endswith('.gz'):      # An installed driver
-        InstallCommandParts.append('-p')                       
-        InstallCommandParts.append('"/Library/Printers/PPDs/Contents/Resources/' + SelectedPPD + '"')
+        InstallCommandParts.append('-P')                       
+        InstallCommandParts.append(SelectedPPDQuoted)
     if SelectedPPD.endswith('.ppd'):    # Built in generic driver
         InstallCommandParts.append('-m')
-        InstallCommandParts.append(SelectedPPD)
+        InstallCommandParts.append(SelectedPPDQuoted)
 
     InstallCommandParts.append('-v')
     InstallCommandParts.append(DeviceURI)
